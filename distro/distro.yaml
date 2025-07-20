@@ -29,6 +29,9 @@ actions:
 {{ if eq $base "debian" }}
     components: [ main, contrib ]
     mirror: https://deb.debian.org/debian
+{{ else if eq $base "pardus" }}
+    components: [ main, non-free, contrib ]
+    mirror: http://depo.pardus.org.tr/pardus
 {{ else }}
     components: [ main, multiverse, universe ]
     mirror: {{ if eq $arch "amd64" }}'https://archive.ubuntu.com/ubuntu'{{ else }}'https://ports.ubuntu.com/ubuntu-ports'{{ end }}
@@ -86,12 +89,24 @@ actions:
       - wget
       - wpasupplicant
       - zip
+      - ca-certificates
+
+
+{{ if eq $base "pardus" }}
+  - action: run
+    description: Install Pardus archive keyring
+    chroot: true
+    command: |
+      wget -c https://depo.pardus.org.tr/pardus/pool/main/p/pardus-archive-keyring/pardus-archive-keyring_2021.1_all.deb -O /tmp/pardus-archive-keyring.deb
+      dpkg -i /tmp/pardus-archive-keyring.deb
+      rm /tmp/pardus-archive-keyring.deb
+{{ end }}
 
   - action: apt
     recommends: false
     packages: [ iwd, systemd-timesyncd ]
 
-{{ if eq $suite "noble" "bookworm" }}
+{{ if eq $suite "noble" "bookworm" "yirmiuc-deb" }}
   - action: apt
     recommends: false
     packages: [ systemd-resolved ]
